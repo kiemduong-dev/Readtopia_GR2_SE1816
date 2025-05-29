@@ -5,33 +5,30 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="dto.AccountDTO" %>
+<%@ include file="../../includes/header.jsp" %>
 
-<html>
-    <head>
-        <title>Danh sách tài khoản</title>
-        <meta charset="UTF-8">
-    </head>
-    <body>
-        <h2>Danh sách tài khoản</h2>
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>📋 Danh sách tài khoản</h3>
+        <a href="${pageContext.request.contextPath}/admin/account/add" class="btn btn-success btn-sm">➕ Thêm tài khoản mới</a>
+    </div>
 
-        <a href="${pageContext.request.contextPath}/admin/account/add">➕ Thêm tài khoản mới</a><br><br>
+    <form method="get" action="${pageContext.request.contextPath}/admin/account/list" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="text" name="keyword" value="${keyword}" class="form-control" placeholder="Tìm kiếm theo username, tên, email...">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary w-100">🔍 Tìm kiếm</button>
+        </div>
+    </form>
 
-        <!-- Form tìm kiếm -->
-        <form method="get" action="${pageContext.request.contextPath}/admin/account/list">
-            <input type="text" name="keyword" placeholder="Tìm theo tên, email, SDT..." value="${keyword}" />
-            <input type="submit" value="Tìm">
-        </form>
-        <br>
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger small">${error}</div>
+    </c:if>
 
-        <!-- Thông báo lỗi nếu có -->
-        <c:if test="${not empty error}">
-            <p style="color:red;">${error}</p>
-        </c:if>
-
-        <!-- Bảng danh sách tài khoản -->
-        <table border="1" cellpadding="8" cellspacing="0">
-            <tr style="background:#f2f2f2;">
+    <table class="table table-hover table-bordered">
+        <thead class="table-light">
+            <tr>
                 <th>Username</th>
                 <th>Họ tên</th>
                 <th>Email</th>
@@ -39,21 +36,24 @@
                 <th>Vai trò</th>
                 <th>Hành động</th>
             </tr>
+        </thead>
+        <tbody>
             <c:forEach var="a" items="${accounts}">
                 <tr>
                     <td>${a.username}</td>
                     <td>${a.fullName}</td>
                     <td>${a.email}</td>
                     <td>${a.phone}</td>
-                    <td>${a.role}</td>
+                    <td><span class="badge bg-info text-dark">${a.role}</span></td>
                     <td>
-                        <a href="${pageContext.request.contextPath}/admin/account/detail?username=${a.username}">Chi tiết</a> |
-                        <a href="${pageContext.request.contextPath}/admin/account/edit?username=${a.username}">Sửa</a> |
-                        <a href="${pageContext.request.contextPath}/admin/account/delete?username=${a.username}"
-                           onclick="return confirm('Bạn có chắc chắn muốn xoá tài khoản này không?')">Xoá</a>
+                        <a href="${pageContext.request.contextPath}/admin/account/detail?username=${a.username}" class="btn btn-sm btn-info">Chi tiết</a>
+                        <a href="${pageContext.request.contextPath}/admin/account/edit?username=${a.username}" class="btn btn-sm btn-warning">Sửa</a>
+                        <a href="${pageContext.request.contextPath}/admin/account/delete?username=${a.username}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xoá?')">Xoá</a>
                     </td>
                 </tr>
             </c:forEach>
-        </table>
-    </body>
-</html>
+        </tbody>
+    </table>
+</div>
+
+<%@ include file="../../includes/footer.jsp" %>

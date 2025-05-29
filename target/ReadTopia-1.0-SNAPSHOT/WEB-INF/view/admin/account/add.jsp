@@ -4,28 +4,72 @@
     Author     : ADMIN
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="dto.AccountDTO" %>
-<jsp:useBean id="account" type="dto.AccountDTO" scope="request" class="dto.AccountDTO"/>
-<html>
-    <head><title>Thêm tài khoản</title></head>
-    <body>
-        <h2>Thêm tài khoản mới</h2>
-        <form action="${pageContext.request.contextPath}/admin/account/add" method="post">
-            <p>Tên đăng nhập: <input type="text" name="username" value="${account.username}" required></p>
-            <p>Mật khẩu: <input type="password" name="password" required></p>
-            <p>Họ tên: <input type="text" name="fullname" value="${account.fullName}" required></p>
-            <p>Email: <input type="email" name="email" value="${account.email}" required></p>
-            <p>Điện thoại: <input type="text" name="phone" value="${account.phone}" required></p>
-            <p>Địa chỉ: <input type="text" name="address" value="${account.address}" required></p>
-            <p>Vai trò:
-                <select name="role">
-                    <option value="customer">Customer</option>
-                    <option value="staff">Staff</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </p>
-            <p><input type="submit" value="Thêm mới"></p>
-            <p style="color:red">${error}</p>
-        </form>
-    </body>
-</html>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="../../includes/header.jsp" %>
+
+<div class="container mt-5 mb-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <h3 class="card-title text-center mb-4">➕ Thêm tài khoản mới</h3>
+
+            <form action="${pageContext.request.contextPath}/admin/account/add" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" name="password" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Họ và tên</label>
+                    <input type="text" name="fullname" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Số điện thoại</label>
+                    <input type="text" name="phone" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ</label>
+                    <input type="text" name="address" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Vai trò</label>
+                    <select name="role" class="form-select" required>
+                        <option value="user">Người dùng</option>
+                        <option value="staff">Nhân viên</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger small">${error}</div>
+                </c:if>
+
+                <c:if test="${not empty success}">
+                    <div class="alert alert-success small">${success}</div>
+                </c:if>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success">Thêm tài khoản</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="${pageContext.request.contextPath}/admin/account/list" class="text-muted small">← Quay lại danh sách</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%@ include file="../../includes/footer.jsp" %>
