@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller.admin;
 
 import dao.AccountDAO;
@@ -11,65 +7,86 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.sql.Date;
 
+/**
+ * Servlet that handles the functionality for an admin to add a new account.
+ * This servlet supports both GET (display form) and POST (handle submission).
+ */
 @WebServlet(name = "AccountAddServlet", urlPatterns = {"/admin/account/add"})
 public class AccountAddServlet extends HttpServlet {
 
     /**
-     * Processes both GET and POST requests for adding a new account.
+     * Handles GET request to display the account creation form.
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        response.setContentType("text/html;charset=UTF-8");
-
-        if ("GET".equalsIgnoreCase(request.getMethod())) {
-            // Show add account form
-            request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
-            return;
-        }
-
-        // Handle POST: create new account
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        String fullName = request.getParameter("fullname");
-        String email = request.getParameter("email");
-        String phone = request.getParameter("phone");
-        String address = request.getParameter("address");
-        String role = request.getParameter("role");
-
-        AccountDTO acc = new AccountDTO(username, password, fullName, email, phone, role, address);
-        AccountDAO dao = new AccountDAO();
-        boolean success = dao.addAccount(acc);
-
-        if (success) {
-            response.sendRedirect("list");
-        } else {
-            request.setAttribute("error", "Failed to add account (username may already exist).");
-            request.setAttribute("account", acc);
-            request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
+        // Forward to JSP form for adding new account
+        request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
     }
 
     /**
-     * Returns a short description of this servlet.
+     * Handles POST request to process new account creation.
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        // Set request and response encoding
+        request.setCharacterEncoding("UTF-8");
+        response.setContentType("text/html;charset=UTF-8");
+
+        try {
+            // ===== Retrieve form input =====
+            String username = request.getParameter("username");
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address");
+
+            int role = Integer.parseInt(request.getParameter("role"));
+            int sex = Integer.parseInt(request.getParameter("sex"));
+
+            // Parse date of birth if provided
+            String dobRaw = request.getParameter("dob");
+            Date dob = (dobRaw != null && !dobRaw.trim().isEmpty()) ? Date.valueOf(dobRaw) : null;
+
+            // Default password for new account
+            String password = "123456";
+
+            // ===== Create DTO from form =====
+            AccountDTO acc = new AccountDTO(username, password, firstName, lastName, dob, email, phone,
+                    role, address, sex, 1, null); // accStatus = 1 (active), code = null
+
+            // ===== Insert into DB =====
+            AccountDAO dao = new AccountDAO();
+            boolean success = dao.addAccount(acc);
+
+            if (success) {
+                // Redirect to account list if added successfully
+                response.sendRedirect("list");
+            } else {
+                // Handle duplicate username/email
+                request.setAttribute("error", "Failed to add account. Username or email may already exist.");
+                request.setAttribute("account", acc); // Preserve input on error
+                request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            // General error message for bad input or exceptions
+            request.setAttribute("error", "Invalid input data. Please check the fields.");
+            request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
+        }
+    }
+
+    /**
+     * @return Short servlet description
      */
     @Override
     public String getServletInfo() {
         return "Handles admin functionality to add a new user account.";
     }
-    // </editor-fold>
 }

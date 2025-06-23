@@ -1,66 +1,58 @@
-<%-- 
-    Document   : detail
-    Created on : May 27, 2025, 8:25:25 PM
-    Author     : ADMIN
---%>
-
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ page import="dto.AccountDTO" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<jsp:useBean id="account" type="dto.AccountDTO" scope="request" />
+<jsp:include page="/WEB-INF/includes/head-admin.jsp" />
+<jsp:include page="/WEB-INF/includes/sidebar-admin.jsp" />
 
-<div class="container mt-5 mb-5">
-    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
-        <div class="card-body">
-            <h3 class="card-title text-center mb-4">👤 Thông tin chi tiết tài khoản</h3>
+<div class="main-content">
+    <div class="content-area">
+        <div class="page-header">
+            <h1 class="page-title">Account Details: <c:out value="${account.username}" /></h1>
+        </div>
 
-            <table class="table table-bordered">
-                <tr>
-                    <th>Username</th>
-                    <td>${account.username}</td>
-                </tr>
-                <tr>
-                    <th>Họ và tên</th>
-                    <td>${account.fullName}</td>
-                </tr>
-                <tr>
-                    <th>Email</th>
-                    <td>${account.email}</td>
-                </tr>
-                <tr>
-                    <th>Điện thoại</th>
-                    <td>${account.phone}</td>
-                </tr>
-                <tr>
-                    <th>Địa chỉ</th>
-                    <td>${account.address}</td>
-                </tr>
-                <tr>
-                    <th>Vai trò</th>
-                    <td><span class="badge bg-secondary">${account.role}</span></td>
-                </tr>
-                <tr>
-                    <th>Trạng thái</th>
-                    <td>
-                        <c:choose>
-                            <c:when test="${account.accStatus == 1}">
-                                <span class="badge bg-success">Hoạt động</span>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="badge bg-danger">Khoá</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
-                </tr>
+        <div class="card">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th>Username</th>
+                        <td><c:out value="${account.username}" /></td>
+                    </tr>
+                    <tr>
+                        <th>First Name</th>
+                        <td><c:out value="${account.firstName}" /></td>
+                    </tr>
+                    <tr>
+                        <th>Last Name</th>
+                        <td><c:out value="${account.lastName}" /></td>
+                    </tr>
+                    <tr>
+                        <th>Sex</th>
+                        <td>
+                            <c:choose>
+                                <c:when test="${account.sex == 1}">Male</c:when>
+                                <c:when test="${account.sex == 0}">Female</c:when>
+                                <c:otherwise>Unknown</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Role</th>
+                        <td>
+                            <c:choose>
+                                <c:when test="${account.role == 0}">Admin</c:when>
+                                <c:when test="${account.role == 1}">Customer</c:when>
+                                <c:otherwise>Unknown</c:otherwise>
+                            </c:choose>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td><c:out value="${account.email}" /></td>
+                    </tr>
+                </tbody>
             </table>
 
-            <div class="text-center mt-3">
-                <a href="${pageContext.request.contextPath}/admin/account/edit?username=${account.username}" class="btn btn-outline-warning btn-sm">✏️ Chỉnh sửa</a>
-                <a href="${pageContext.request.contextPath}/admin/account/list" class="btn btn-outline-secondary btn-sm">← Quay lại danh sách</a>
-            </div>
+            <a href="${pageContext.request.contextPath}/admin/account/list" class="btn btn-secondary mt-3">Back to list</a>
         </div>
     </div>
 </div>
-<%@ include file="../../includes/footer.jsp" %>

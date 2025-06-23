@@ -1,55 +1,116 @@
-<%-- 
-    Document   : register
-    Created on : May 27, 2025, 7:04:36 PM
-    Author     : ADMIN
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
-    <div class="card p-4 shadow-sm w-100" style="max-width: 600px;">
-        <h3 class="text-center mb-4">📝 Đăng ký tài khoản</h3>
+<!DOCTYPE html>
+<html lang="vi">
+    <jsp:include page="/WEB-INF/includes/head.jsp" />
 
-        <form action="${pageContext.request.contextPath}/register" method="post">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Tên đăng nhập</label>
-                    <input type="text" name="username" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Mật khẩu</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-                <div class="col-12 mb-3">
-                    <label class="form-label">Họ và tên</label>
-                    <input type="text" name="fullname" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Số điện thoại</label>
-                    <input type="text" name="phone" class="form-control" required>
-                </div>
-                <div class="col-12 mb-3">
-                    <label class="form-label">Địa chỉ</label>
-                    <input type="text" name="address" class="form-control" required>
-                </div>
+    <body>
+        <jsp:include page="/WEB-INF/includes/header.jsp" />
+
+        <div class="form-container">
+            <div class="logo-section">
+                <div class="logo-bear"></div>
+                <div class="logo-text">Register Account</div>
             </div>
 
+            <!-- Toast Notification -->
+            <jsp:include page="/WEB-INF/includes/toast.jsp" />
+
+            <!-- Thông báo lỗi/thành công -->
             <c:if test="${not empty error}">
-                <div class="alert alert-danger small">${error}</div>
+                <div class="success-message" style="background: #ffebee; color: #c62828;">
+                    <i class="fas fa-times-circle"></i> <span>${error}</span>
+                </div>
+            </c:if>
+            <c:if test="${not empty success}">
+                <div class="success-message">
+                    <i class="fas fa-check-circle"></i> <span>${success}</span>
+                </div>
             </c:if>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-success">Đăng ký</button>
-            </div>
-        </form>
+            <form action="${pageContext.request.contextPath}/register" method="post">
 
-        <div class="text-center mt-3">
-            <a href="${pageContext.request.contextPath}/login">Đã có tài khoản? Đăng nhập</a>
+                <!-- Username + Email -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">* Username</label>
+                        <input type="text" name="username" class="form-input" required value="${param.username}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">* Email</label>
+                        <input type="email" name="email" class="form-input" required value="${param.email}">
+                    </div>
+                </div>
+
+                <!-- Password + Confirm -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">* Password</label>
+                        <input type="password" name="password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">* Confirm Password</label>
+                        <input type="password" name="confirmPassword" class="form-input" required>
+                    </div>
+                </div>
+
+                <!-- First name + Last name -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">* First Name</label>
+                        <input type="text" name="firstName" class="form-input" required value="${param.firstName}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">* Last Name</label>
+                        <input type="text" name="lastName" class="form-input" required value="${param.lastName}">
+                    </div>
+                </div>
+
+                <!-- Phone + DOB -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">* Phone</label>
+                        <input type="tel" name="phone" class="form-input" required value="${param.phone}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">* Date of Birth</label>
+                        <input type="date" name="dob" class="form-input" required value="${param.dob}">
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="form-group">
+                    <label class="form-label">* Gender</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="female" name="sex" value="female"
+                                   <c:if test="${param.sex == 'female'}">checked</c:if> />
+                                   <label for="female">Female</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio" id="male" name="sex" value="male"
+                                <c:if test="${param.sex != 'female'}">checked</c:if> />
+                                <label for="male">Male</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Address -->
+                    <div class="form-group">
+                        <label class="form-label">* Address</label>
+                        <textarea name="address" class="form-input" rows="3" required>${param.address}</textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="btn-group mt-4">
+                    <button type="submit" class="btn btn-primary">Register</button>
+                    <button type="reset" class="btn btn-secondary">Reset</button>
+                    <a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">← Back to Login</a>
+                </div>
+            </form>
         </div>
-    </div>
-</div>
-<%@ include file="../../includes/footer.jsp" %>
+
+        <jsp:include page="/WEB-INF/includes/footer.jsp" />
+    </body>
+</html>

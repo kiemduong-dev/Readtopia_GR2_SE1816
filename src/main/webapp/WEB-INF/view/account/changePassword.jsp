@@ -1,50 +1,60 @@
 <%-- 
     Document   : changePassword
-    Created on : May 27, 2025, 8:20:47 PM
-    Author     : ADMIN
+    Created on : May 27, 2025
+    Author     : ADMIN 
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="container mt-5 mb-5">
-    <div class="card mx-auto shadow-sm" style="max-width: 500px;">
-        <div class="card-body">
-            <h3 class="text-center mb-4">🔒 Đổi mật khẩu</h3>
+<!DOCTYPE html>
+<html lang="vi">
+    <jsp:include page="/WEB-INF/includes/head.jsp" />
 
-            <form action="${pageContext.request.contextPath}/change-password" method="post">
-                <div class="mb-3">
-                    <label class="form-label">Mật khẩu hiện tại</label>
-                    <input type="password" name="currentPassword" class="form-control" required>
-                </div>
+    <body>
+        <jsp:include page="/WEB-INF/includes/header.jsp" />
 
-                <div class="mb-3">
-                    <label class="form-label">Mật khẩu mới</label>
-                    <input type="password" name="newPassword" class="form-control" required>
-                </div>
+        <div class="main-content">
+            <div class="form-container" style="max-width: 600px; margin: 40px auto;">
+                <h2 class="text-center mb-4">🔑 Change Password</h2>
 
-                <div class="mb-3">
-                    <label class="form-label">Xác nhận mật khẩu mới</label>
-                    <input type="password" name="confirmPassword" class="form-control" required>
-                </div>
-
+                <!-- Thông báo lỗi/thành công -->
                 <c:if test="${not empty error}">
-                    <div class="alert alert-danger small">${error}</div>
+                    <div class="success-message" style="background: #fce4ec; color: #c62828;">
+                        <i class="fas fa-times-circle"></i>
+                        <span>${error}</span>
+                    </div>
                 </c:if>
-
                 <c:if test="${not empty success}">
-                    <div class="alert alert-success small">${success}</div>
+                    <div class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${success}</span>
+                    </div>
                 </c:if>
 
-                <div class="d-grid">
-                    <button type="submit" class="btn btn-danger">Cập nhật mật khẩu</button>
-                </div>
-            </form>
+                <form method="post" action="${pageContext.request.contextPath}/change-password">
+                    <div class="form-group">
+                        <label class="form-label">Current Password *</label>
+                        <input type="password" class="form-input" name="oldPassword" placeholder="Enter current password" required />
+                    </div>
 
-            <div class="text-center mt-3">
-                <a href="${pageContext.request.contextPath}/profile" class="text-muted small">← Quay lại hồ sơ</a>
+                    <div class="form-group">
+                        <label class="form-label">New Password *</label>
+                        <input type="password" class="form-input" name="newPassword" placeholder="Enter new password" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-input" name="confirmPassword" placeholder="Re-enter new password" required />
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">💾 Save</button>
+                        <a href="${pageContext.request.contextPath}/profile" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
             </div>
         </div>
-    </div>
-</div>
 
-<%@ include file="../../includes/footer.jsp" %>
+        <jsp:include page="/WEB-INF/includes/footer.jsp" />
+    </body>
+</html>

@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.AccountDAO;
@@ -11,57 +7,101 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
+/**
+ * LoginServlet
+ *
+ * This servlet handles user login logic.
+ * - Supports GET requests to display the login form.
+ * - Supports POST requests to authenticate credentials.
+ * - Redirects users based on role after successful login.
+ */
 @WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
 
     /**
-     * Processes both GET and POST requests for user login.
+     * Handles both GET and POST requests.
+     * Algorithm:
+     * 1. If GET → display login form.
+     * 2. If POST → validate credentials using DAO.
+     *    a. On success → store user in session and redirect based on role.
+     *    b. On failure → return to login page with error message.
+     *
+     * @param request  HttpServletRequest from client
+     * @param response HttpServletResponse to client
+     * @throws ServletException if servlet error occurs
+     * @throws IOException      if I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Step 1: Set content type and encoding
         response.setContentType("text/html;charset=UTF-8");
 
+        // Step 2: Check if the request is GET
         if ("GET".equalsIgnoreCase(request.getMethod())) {
-            // Display login form
+            // Show login form
             request.getRequestDispatcher("/WEB-INF/view/account/login.jsp").forward(request, response);
             return;
         }
 
-        // Handle POST request: authenticate login
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
+        // Step 3: Process login from form (POST)
+        String username = request.getParameter("username"); // Get username input
+        String password = request.getParameter("password"); // Get password input
 
-        AccountDAO dao = new AccountDAO();
-        AccountDTO account = dao.login(username, password);
+        AccountDAO dao = new AccountDAO(); // Create DAO instance
+        AccountDTO account = dao.login(username, password); // Authenticate user
 
+        // Step 4: If login successful
         if (account != null) {
+            // Create or retrieve session
             HttpSession session = request.getSession();
-            session.setAttribute("account", account);
+            session.setAttribute("account", account); // Store account in session
 
-            String role = account.getRole();
-            if ("admin".equals(role)) {
-                response.sendRedirect("admin/dashboard.jsp");
-            } else if ("staff".equals(role)) {
-                response.sendRedirect("staff/dashboard.jsp");
-            } else {
-                response.sendRedirect("home.jsp");
+            // Get user role
+            int role = account.getRole();
+
+            // Step 5: Redirect user based on their role
+            switch (role) {
+                case 0: // Admin
+                case 2: // Seller Staff
+                case 3: // Warehouse Staff
+                    response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+                    break;
+                default: // Customers or others
+                    response.sendRedirect(request.getContextPath() + "/home");
+                    break;
             }
+
         } else {
-            request.setAttribute("error", "Invalid username or password!");
+            // Step 6: Login failed
+            request.setAttribute("error", "Invalid username or password.");
             request.getRequestDispatcher("/WEB-INF/view/account/login.jsp").forward(request, response);
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles GET request to render the login form.
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     * @throws ServletException if servlet error occurs
+     * @throws IOException      if I/O error occurs
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
 
+    /**
+     * Handles POST request to process login form.
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     * @throws ServletException if servlet error occurs
+     * @throws IOException      if I/O error occurs
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -69,11 +109,12 @@ public class LoginServlet extends HttpServlet {
     }
 
     /**
-     * Returns a short description of this servlet.
+     * Returns description of the servlet.
+     *
+     * @return Short description string
      */
     @Override
     public String getServletInfo() {
-        return "Handles user login and role-based redirection.";
+        return "Handles user login and redirects to dashboard or homepage based on role.";
     }
-    // </editor-fold>
 }

@@ -1,59 +1,48 @@
-<%-- 
-    Document   : list
-    Created on : May 27, 2025, 8:22:52 PM
-    Author     : ADMIN
---%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>📋 Danh sách tài khoản</h3>
-        <a href="${pageContext.request.contextPath}/admin/account/add" class="btn btn-success btn-sm">➕ Thêm tài khoản mới</a>
-    </div>
+<jsp:include page="/WEB-INF/includes/head-admin.jsp" />
+<jsp:include page="/WEB-INF/includes/sidebar-admin.jsp" />
 
-    <form method="get" action="${pageContext.request.contextPath}/admin/account/list" class="row g-2 mb-3">
-        <div class="col-md-4">
-            <input type="text" name="keyword" value="${keyword}" class="form-control" placeholder="Tìm kiếm theo username, tên, email...">
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary w-100">🔍 Tìm kiếm</button>
-        </div>
-    </form>
-
-    <c:if test="${not empty error}">
-        <div class="alert alert-danger small">${error}</div>
-    </c:if>
-
-    <table class="table table-hover table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Username</th>
-                <th>Họ tên</th>
-                <th>Email</th>
-                <th>Điện thoại</th>
-                <th>Vai trò</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            <c:forEach var="a" items="${accounts}">
+<div class="main-content">
+    <div class="content-area">
+        <h1>Account Management</h1>
+        <button class="btn btn-primary" onclick="location.href = '${pageContext.request.contextPath}/admin/account/add'">
+            <i class="fas fa-plus"></i> Add Account
+        </button>
+        <table class="table" style="margin-top:15px;">
+            <thead>
                 <tr>
-                    <td>${a.username}</td>
-                    <td>${a.fullName}</td>
-                    <td>${a.email}</td>
-                    <td>${a.phone}</td>
-                    <td><span class="badge bg-info text-dark">${a.role}</span></td>
-                    <td>
-                        <a href="${pageContext.request.contextPath}/admin/account/detail?username=${a.username}" class="btn btn-sm btn-info">Chi tiết</a>
-                        <a href="${pageContext.request.contextPath}/admin/account/edit?username=${a.username}" class="btn btn-sm btn-warning">Sửa</a>
-                        <a href="${pageContext.request.contextPath}/admin/account/delete?username=${a.username}" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xoá?')">Xoá</a>
-                    </td>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Sex</th>
+                    <th>Role</th>
+                    <th>Email</th>
+                    <th>Actions</th>
                 </tr>
-            </c:forEach>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <c:forEach var="acc" items="${accounts}">
+                    <tr>
+                        <td><c:out value="${acc.username}" /></td>
+                        <td><c:out value="${acc.firstName} ${acc.lastName}" /></td>
+                        <td><c:out value="${acc.sex == 1 ? 'Male' : 'Female'}" /></td>
+                        <td>
+                            <c:choose>
+                                <c:when test="${acc.role == 0}">Admin</c:when>
+                                <c:when test="${acc.role == 1}">Customer</c:when>
+                                <c:otherwise>Unknown</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td><c:out value="${acc.email}" /></td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/admin/account/detail?username=${acc.username}" class="btn btn-info btn-icon" title="View"><i class="fas fa-eye"></i></a>
+                            <a href="${pageContext.request.contextPath}/admin/account/edit?username=${acc.username}" class="btn btn-warning btn-icon" title="Edit"><i class="fas fa-edit"></i></a>
+                            <!-- Thêm xóa nếu cần -->
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<%@ include file="../../includes/footer.jsp" %>

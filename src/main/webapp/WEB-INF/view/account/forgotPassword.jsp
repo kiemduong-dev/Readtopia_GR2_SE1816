@@ -1,34 +1,65 @@
-<%-- 
-    Document   : forgotPassword
-    Created on : May 27, 2025, 7:22:55 PM
-    Author     : ADMIN
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card p-4 shadow-sm" style="width: 100%; max-width: 450px;">
-        <h3 class="text-center mb-3">🔑 Quên mật khẩu</h3>
+<!DOCTYPE html>
+<html lang="vi">
+    <jsp:include page="/WEB-INF/includes/head.jsp" />
 
-        <form action="${pageContext.request.contextPath}/forgot-password" method="post">
-            <div class="mb-3">
-                <label class="form-label">Nhập email đã đăng ký</label>
-                <input type="email" name="email" class="form-control" required>
+    <body>
+        <jsp:include page="/WEB-INF/includes/header.jsp" />
+
+        <div class="main-content">
+            <div class="form-container"
+                 style="max-width: 500px; margin: 40px auto; background: #fff;
+                 border-radius: 15px; padding: 30px;
+                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+
+                <!-- Logo -->
+                <div class="logo-section text-center mb-3">
+                    <div class="logo-bear"></div>
+                    <div class="logo-text">READTOPIA</div>
+                </div>
+
+                <!-- Tiêu đề -->
+                <h2 class="text-center mb-4">🔐 Quên Mật Khẩu</h2>
+
+                <!-- Thông báo -->
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger text-center" role="alert">
+                        <i class="fas fa-exclamation-circle"></i> ${error}
+                    </div>
+                </c:if>
+                <c:if test="${not empty success}">
+                    <div class="alert alert-success text-center" role="alert">
+                        <i class="fas fa-check-circle"></i> ${success}
+                    </div>
+                </c:if>
+
+                <!-- Form -->
+                <form action="${pageContext.request.contextPath}/forgot-password" method="post" autocomplete="off">
+                    <div class="form-group mb-3">
+                        <label class="form-label">* Tên đăng nhập:</label>
+                        <input type="text" name="username" class="form-control" required />
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label class="form-label">* Email:</label>
+                        <input type="email" name="email" class="form-control" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-paper-plane"></i> Gửi mã OTP
+                    </button>
+
+                    <div class="text-center mt-4">
+                        <a href="${pageContext.request.contextPath}/login" class="link">
+                            🔙 Quay lại đăng nhập
+                        </a>
+                    </div>
+                </form>
             </div>
-
-            <c:if test="${not empty error}">
-                <div class="alert alert-danger py-1 small">${error}</div>
-            </c:if>
-
-            <div class="d-grid">
-                <button type="submit" class="btn btn-warning">Gửi yêu cầu đặt lại mật khẩu</button>
-            </div>
-        </form>
-
-        <div class="text-center mt-3">
-            <a href="${pageContext.request.contextPath}/login" class="text-muted small">← Quay lại đăng nhập</a>
         </div>
-    </div>
-</div>
 
-<%@ include file="../../includes/footer.jsp" %>
+        <jsp:include page="/WEB-INF/includes/footer.jsp" />
+    </body>
+</html>

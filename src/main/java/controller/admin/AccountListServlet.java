@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller.admin;
 
 import dao.AccountDAO;
@@ -13,39 +9,88 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * AccountListServlet
+ *
+ * This servlet is responsible for displaying the list of user accounts
+ * to the admin. It supports keyword-based search functionality.
+ */
 @WebServlet(name = "AccountListServlet", urlPatterns = {"/admin/account/list"})
 public class AccountListServlet extends HttpServlet {
 
     /**
-     * Processes GET requests to display the list of all user accounts (for admin).
+     * Processes both GET and POST requests.
+     *
+     * Algorithm:
+     * 1. Retrieve optional "keyword" parameter from request.
+     * 2. If keyword is present and valid, perform a filtered search using DAO.
+     * 3. If keyword is not provided, retrieve the full list of accounts.
+     * 4. Set the result list in the request scope.
+     * 5. Forward to JSP view for rendering.
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     * @throws ServletException on servlet error
+     * @throws IOException      on I/O error
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Set response encoding to handle UTF-8 characters in search queries
         response.setContentType("text/html;charset=UTF-8");
 
+        // Step 1: Get keyword from request parameter (can be null or empty)
         String keyword = request.getParameter("keyword");
+
+        // Create DAO instance to interact with database
         AccountDAO dao = new AccountDAO();
         List<AccountDTO> accounts;
 
+        // Step 2: If keyword is provided and not empty, search accounts
         if (keyword != null && !keyword.trim().isEmpty()) {
+            // Perform search using trimmed keyword
             accounts = dao.searchAccounts(keyword.trim());
-            request.setAttribute("keyword", keyword);
+
+            // Store keyword back to request so UI can display it
+            request.setAttribute("keyword", keyword.trim());
         } else {
+            // Step 3: If no keyword, fetch full account list
             accounts = dao.getAllAccounts();
         }
 
+        // Step 4: Set retrieved account list to request attribute
         request.setAttribute("accounts", accounts);
+
+        // Step 5: Forward to JSP page to render the data
         request.getRequestDispatcher("/WEB-INF/view/admin/account/list.jsp").forward(request, response);
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles HTTP GET method.
+     *
+     * Typically triggered when admin navigates to the account list page.
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     * @throws ServletException when dispatch fails
+     * @throws IOException      on I/O error
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         processRequest(request, response);
     }
 
+    /**
+     * Handles HTTP POST method.
+     *
+     * Typically used when search form is submitted via POST.
+     *
+     * @param request  HttpServletRequest
+     * @param response HttpServletResponse
+     * @throws ServletException when dispatch fails
+     * @throws IOException      on I/O error
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -54,10 +99,11 @@ public class AccountListServlet extends HttpServlet {
 
     /**
      * Returns a short description of this servlet.
+     *
+     * @return String describing the servlet
      */
     @Override
     public String getServletInfo() {
-        return "Displays the list of all accounts for admin (with search support).";
+        return "Displays the list of all user accounts with optional search support for admin.";
     }
-    // </editor-fold>
 }

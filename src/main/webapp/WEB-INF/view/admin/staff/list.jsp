@@ -1,41 +1,46 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div class="container mt-5 mb-5">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3>👥 Danh sách nhân viên</h3>
-        <a href="${pageContext.request.contextPath}/admin/staff/add" class="btn btn-success btn-sm">➕ Thêm nhân viên</a>
-    </div>
+<jsp:include page="/WEB-INF/includes/head-admin.jsp" />
+<jsp:include page="/WEB-INF/includes/sidebar-admin.jsp" />
 
-    <table class="table table-hover table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Username</th>
-                <th>Họ tên</th>
-                <th>Email</th>
-                <th>Điện thoại</th>
-                <th>Địa chỉ</th>
-                <th>Hành động</th>
-            </tr>
-        </thead>
-        <tbody>
-            <c:forEach var="s" items="${staffs}">
-                <tr>
-                    <td>${s.username}</td>
-                    <td>${s.fullName}</td>
-                    <td>${s.email}</td>
-                    <td>${s.phone}</td>
-                    <td>${s.address}</td>
+<div class="main-content">
+    <div class="content-area">
+        <div class="page-header">
+            <h1 class="page-title">Staff Management</h1>
+        </div>
+
+        <button class="btn btn-primary" onclick="location.href = '${pageContext.request.contextPath}/admin/staff/add'">
+            <i class="fas fa-plus"></i> Add Staff
+        </button>
+
+        <div class="table-container" style="margin-top: 15px;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Staff ID</th>
+                        <th>Username</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="staff" items="${staffs}">
+                    <tr>
+                        <td><c:out value="${staff.staffID}" /></td>
+                    <td><c:out value="${staff.username}" /></td>
                     <td>
-                        <a href="${pageContext.request.contextPath}/admin/staff/detail?username=${s.username}" class="btn btn-info btn-sm">Chi tiết</a>
-                        <a href="${pageContext.request.contextPath}/admin/staff/edit?username=${s.username}" class="btn btn-warning btn-sm">Sửa</a>
-                        <a href="${pageContext.request.contextPath}/admin/staff/delete?username=${s.username}" class="btn btn-danger btn-sm" onclick="return confirm('Xác nhận xoá?')">Xoá</a>
+                        <a href="${pageContext.request.contextPath}/admin/staff/detail?staffID=${staff.staffID}" class="btn btn-icon btn-info" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="${pageContext.request.contextPath}/admin/staff/edit?staffID=${staff.staffID}" class="btn btn-icon btn-warning" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <!-- Nếu cần, thêm nút xóa tại đây -->
                     </td>
-                </tr>
-            </c:forEach>
-        </tbody>
-    </table>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-
-<%@ include file="../../includes/footer.jsp" %>

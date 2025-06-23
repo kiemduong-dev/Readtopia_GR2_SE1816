@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package controller;
 
 import dao.AccountDAO;
@@ -14,44 +10,44 @@ import java.io.IOException;
 @WebServlet(name = "ResetPasswordServlet", urlPatterns = {"/reset-password"})
 public class ResetPasswordServlet extends HttpServlet {
 
-    /**
-     * Processes POST request for resetting password using email stored in session.
-     */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
         response.setContentType("text/html;charset=UTF-8");
 
-        String newPassword = request.getParameter("newPassword");
-        String confirmPassword = request.getParameter("confirmPassword");
+        HttpSession session = request.getSession(false);
+        String username = (session != null) ? (String) session.getAttribute("resetUsername") : null;
 
-        HttpSession session = request.getSession();
-        String email = (String) session.getAttribute("resetEmail");
-
-        if (email == null) {
+        if (username == null) {
+            System.out.println("⚠️ Không có resetUsername trong session → về forgot-password");
             response.sendRedirect("forgot-password");
             return;
         }
 
-        if (!newPassword.equals(confirmPassword)) {
-            request.setAttribute("error", "Confirm password does not match!");
+        String newPassword = request.getParameter("newPassword");
+        String confirmPassword = request.getParameter("confirmPassword");
+
+        if (newPassword == null || confirmPassword == null || !newPassword.equals(confirmPassword)) {
+            request.setAttribute("error", "Mật khẩu xác nhận không khớp hoặc bị trống.");
             request.getRequestDispatcher("/WEB-INF/view/account/resetPassword.jsp").forward(request, response);
             return;
         }
 
         AccountDAO dao = new AccountDAO();
-        boolean success = dao.updatePassword(email, newPassword);
+        boolean updated = dao.updatePasswordByUsername(username, newPassword);
 
-        if (success) {
-            session.removeAttribute("resetEmail");
-            response.sendRedirect("login");
+        if (updated) {
+            session.removeAttribute("resetUsername");
+            System.out.println("✅ Đặt lại mật khẩu thành công cho user: " + username);
+
+            request.setAttribute("success", "Đặt lại mật khẩu thành công. Vui lòng đăng nhập.");
+            request.getRequestDispatcher("/WEB-INF/view/account/login.jsp").forward(request, response);
         } else {
-            request.setAttribute("error", "Failed to update password.");
+            request.setAttribute("error", "Đặt lại mật khẩu thất bại. Vui lòng thử lại.");
             request.getRequestDispatcher("/WEB-INF/view/account/resetPassword.jsp").forward(request, response);
         }
     }
 
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -61,16 +57,12 @@ public class ResetPasswordServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Optional: redirect to forgot password if accessed directly
+        // Tránh vào trực tiếp không qua OTP
         response.sendRedirect("forgot-password");
     }
 
-    /**
-     * Returns a short description of this servlet.
-     */
     @Override
     public String getServletInfo() {
-        return "Handles password reset using email verification.";
+        return "Handles password reset after OTP verification";
     }
-    // </editor-fold>
 }

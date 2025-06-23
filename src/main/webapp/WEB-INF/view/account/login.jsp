@@ -1,38 +1,70 @@
-<%-- 
-    Document   : login
-    Created on : May 27, 2025, 7:12:36 PM
-    Author     : ADMIN
---%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ include file="../../includes/header.jsp" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+<!DOCTYPE html>
+<html lang="vi">
+    <jsp:include page="/WEB-INF/includes/head.jsp" />
 
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card p-4 shadow-sm" style="width: 100%; max-width: 400px;">
-        <h3 class="text-center mb-4">🔐 Đăng nhập</h3>
+    <body>
+        <jsp:include page="/WEB-INF/includes/header.jsp" />
 
-        <form action="${pageContext.request.contextPath}/login" method="post">
-            <div class="mb-3">
-                <label for="username" class="form-label">Tên đăng nhập</label>
-                <input type="text" class="form-control" name="username" id="username" required />
+        <!-- Login Form Wrapper -->
+        <div class="main-content">
+            <div class="modal-content" style="margin-top: 80px;">
+                <!-- Modal Header with Title -->
+                <div class="modal-header">
+                    <h2>🔐 Login to ReadTopia</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="modal-body">
+
+                    <!-- Logo branding -->
+                    <div class="logo-section">
+                        <div class="logo-bear"></div>
+                        <div class="logo-text">READTOPIA</div>
+                    </div>
+
+                    <!-- Thông báo lỗi -->
+                    <c:if test="${not empty error}">
+                        <div class="success-message" style="background: #ffebee; color: #c62828;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            ${error}
+                        </div>
+                    </c:if>
+
+                    <!-- Form đăng nhập -->
+                    <form action="${pageContext.request.contextPath}/login" method="post">
+                        <div class="form-group">
+                            <label class="form-label">* Username:</label>
+                            <input type="text" class="form-input" name="username" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">* Password:</label>
+                            <input type="password" class="form-input" name="password" required />
+                        </div>
+
+                        <!-- Forgot password -->
+                        <div class="text-center mt-20">
+                            <a href="${pageContext.request.contextPath}/forgot-password" class="link">Forgot password?</a>
+                        </div>
+
+                        <!-- Button Group -->
+                        <div class="btn-group" style="margin-top: 30px;">
+                            <button type="submit" class="btn btn-primary">Login</button>
+                            <a href="${pageContext.request.contextPath}/register" class="btn btn-secondary">Register</a>
+                        </div>
+
+                        <!-- Back to Home -->
+                        <div class="text-center mt-20">
+                            <a href="${pageContext.request.contextPath}/home" class="link">⬅ Back to Home</a>
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="mb-3">
-                <label for="password" class="form-label">Mật khẩu</label>
-                <input type="password" class="form-control" name="password" id="password" required />
-            </div>
-            <c:if test="${not empty error}">
-                <div class="alert alert-danger py-1 small">${error}</div>
-            </c:if>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Đăng nhập</button>
-            </div>
-        </form>
-
-        <div class="text-center mt-3">
-            <a href="${pageContext.request.contextPath}/view/account/forgotPassword.jsp">Quên mật khẩu?</a><br>
-            <a href="${pageContext.request.contextPath}/view/account/register.jsp" class="text-muted small">Chưa có tài khoản? Đăng ký</a>
         </div>
-    </div>
-</div>
 
-<%@ include file="../../includes/footer.jsp" %>
+        <jsp:include page="/WEB-INF/includes/footer.jsp" />
+    </body>
+</html>

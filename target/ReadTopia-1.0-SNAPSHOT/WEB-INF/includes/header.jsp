@@ -1,16 +1,71 @@
-<%@ include file="head.jsp" %>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-    <a class="navbar-brand" href="${pageContext.request.contextPath}/index.jsp">? ReadTopia</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="mainNavbar">
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/home.jsp">Trang ch?</a></li>
-            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/view/book/list.jsp">Sách</a></li>
-            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/view/account/profile.jsp">Tài Kho?n</a></li>
-            <li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/logout">??ng U?t</a></li>
-        </ul>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<header class="header">
+    <div class="header-content">
+        <!-- Logo -->
+        <div class="logo">
+            <div class="logo-icon">?</div>
+            ReadTopia
+        </div>
+
+        <!-- Thanh tìm ki?m -->
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="search book..." aria-label="Search books">
+            <button class="header-icon" id="searchBtn" title="search">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+
+        <!-- Các hành ??ng -->
+        <div class="header-actions">
+            <div class="header-icons">
+                <button class="header-icon" title="Thông báo" onclick="showPromotions()">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <button class="header-icon" title="Bi?u ?? th?ng kê">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+                <button class="header-icon" title="th?ng kê" onclick="showCart()">
+                    <i class="fas fa-shopping-cart"></i>
+                </button>
+            </div>
+
+            <!-- Menu ng??i dùng -->
+            <div class="user-dropdown">
+                <div class="user-menu" onclick="toggleDropdown()" tabindex="0" role="button" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-user"></i>
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.account}">
+                            <span>${sessionScope.account.username}</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span>Login</span>
+                        </c:otherwise>
+                    </c:choose>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+
+                <div class="dropdown-content" id="userDropdown" role="menu" aria-label="User menu">
+                    <c:choose>
+                        <c:when test="${not empty sessionScope.account}">
+                            <a href="${pageContext.request.contextPath}/profile" class="dropdown-item" role="menuitem">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <a href="${pageContext.request.contextPath}/orders" class="dropdown-item" role="menuitem">
+                                <i class="fas fa-shopping-bag"></i> Order History
+                            </a>
+                            <a href="${pageContext.request.contextPath}/logout" class="dropdown-item" role="menuitem">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </c:when>
+                        <c:otherwise>
+                            <a href="${pageContext.request.contextPath}/login" class="dropdown-item" role="menuitem">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+            </div>
+        </div>
     </div>
-</nav>
+</header>
