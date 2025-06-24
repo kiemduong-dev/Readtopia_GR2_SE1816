@@ -1,4 +1,6 @@
+controller\VerifyOTPRegisterServlet.class
 controller\admin\StaffEditServlet.class
+util\SecurityUtil.class
 controller\ForgotPasswordServlet.class
 dao\AccountDAO.class
 controller\ChangePasswordServlet.class
@@ -12,6 +14,7 @@ controller\admin\DashboardServlet.class
 dto\BookSoldDTO.class
 util\MailUtil.class
 controller\LoginServlet.class
+controller\VerifyOTPResetServlet.class
 controller\HomePageServlet.class
 controller\admin\StaffDeleteServlet.class
 dao\DashboardDAO.class
@@ -19,6 +22,7 @@ controller\EditProfileServlet.class
 dto\StaffDTO.class
 util\DBContext.class
 dao\StaffDAO.class
+HashGenerator.class
 controller\admin\StaffAddServlet.class
 controller\LogoutServlet.class
 controller\admin\AccountAddServlet.class

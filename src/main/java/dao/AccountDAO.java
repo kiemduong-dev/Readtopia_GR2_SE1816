@@ -2,6 +2,7 @@ package dao;
 
 import dto.AccountDTO;
 import util.DBContext;
+import util.SecurityUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class AccountDAO {
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, acc.getUsername());
-            ps.setString(2, acc.getPassword());
+            ps.setString(2, SecurityUtil.hashPassword(acc.getPassword()));
             ps.setString(3, acc.getFirstName());
             ps.setString(4, acc.getLastName());
             ps.setString(5, acc.getEmail());
@@ -37,15 +38,17 @@ public class AccountDAO {
 
     // === ĐĂNG NHẬP ===
     public AccountDTO login(String username, String password) {
-        String sql = "SELECT * FROM Account WHERE username = ? AND password = ? AND accStatus = 1";
+        String sql = "SELECT * FROM Account WHERE username = ? AND accStatus = 1";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
-            ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
 
             if (rs.next()) {
-                return extractAccount(rs);
+                String hashed = rs.getString("password");
+                if (SecurityUtil.checkPassword(password, hashed)) {
+                    return extractAccount(rs);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,33 +63,34 @@ public class AccountDAO {
 
             ps.setString(1, email);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 return extractAccount(rs);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
+    // === TÌM THEO USERNAME ===
     public AccountDTO getAccountByUsername(String username) {
         String sql = "SELECT * FROM Account WHERE username = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 return extractAccount(rs);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    // === CẬP NHẬT THÔNG TIN CÁ NHÂN ===
+    // === CẬP NHẬT HỒ SƠ NGƯỜI DÙNG ===
     public boolean updateProfile(AccountDTO acc) {
         String sql = "UPDATE Account SET firstName=?, lastName=?, email=?, phone=?, address=? WHERE username=?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -105,51 +109,57 @@ public class AccountDAO {
         return false;
     }
 
-    // === CẬP NHẬT MẬT KHẨU ===
+    // === ĐỔI MẬT KHẨU BẰNG EMAIL ===
     public boolean updatePassword(String email, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE email = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newPassword);
+            ps.setString(1, SecurityUtil.hashPassword(newPassword));
             ps.setString(2, email);
-
             return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    // === ĐỔI MẬT KHẨU BẰNG USERNAME ===
     public boolean updatePasswordByUsername(String username, String newPassword) {
         String sql = "UPDATE Account SET password = ? WHERE username = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newPassword);
+            ps.setString(1, SecurityUtil.hashPassword(newPassword));
             ps.setString(2, username);
-
             return ps.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    // === ĐỔI MẬT KHẨU CÓ KIỂM TRA MẬT KHẨU CŨ ===
     public boolean updatePasswordByOld(String username, String oldPass, String newPass) {
-        String sql = "UPDATE Account SET password = ? WHERE username = ? AND password = ?";
+        String sql = "SELECT password FROM Account WHERE username = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newPass);
-            ps.setString(2, username);
-            ps.setString(3, oldPass);
+            ps.setString(1, username);
+            ResultSet rs = ps.executeQuery();
 
-            return ps.executeUpdate() > 0;
+            if (rs.next()) {
+                String currentHashed = rs.getString("password");
+                if (SecurityUtil.checkPassword(oldPass, currentHashed)) {
+                    return updatePasswordByUsername(username, newPass);
+                }
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    // === CẬP NHẬT TỪ ADMIN ===
+    // === ADMIN CẬP NHẬT THÔNG TIN NGƯỜI DÙNG ===
     public boolean updateAccountByAdmin(AccountDTO acc) {
         String sql = "UPDATE Account SET firstName=?, lastName=?, email=?, phone=?, address=?, role=?, sex=?, dob=? WHERE username=?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -171,12 +181,13 @@ public class AccountDAO {
         return false;
     }
 
-    // === XÓA ACCOUNT ===
-    public boolean deleteAccount(String username) {
-        String sql = "DELETE FROM Account WHERE username = ?";
+    public boolean updateAccountStatus(AccountDTO acc) {
+        String sql = "UPDATE Account SET accStatus = ? WHERE username = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, username);
+            ps.setInt(1, acc.getAccStatus());
+            ps.setString(2, acc.getUsername());
+
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -184,7 +195,7 @@ public class AccountDAO {
         return false;
     }
 
-    // === LẤY TẤT CẢ ACCOUNT ===
+    // === LẤY TOÀN BỘ TÀI KHOẢN ===
     public List<AccountDTO> getAllAccounts() {
         List<AccountDTO> list = new ArrayList<>();
         String sql = "SELECT * FROM Account";
@@ -194,16 +205,19 @@ public class AccountDAO {
             while (rs.next()) {
                 list.add(extractAccount(rs));
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
     }
 
-    // === TÌM KIẾM THEO KEYWORD ===
     public List<AccountDTO> searchAccounts(String keyword) {
         List<AccountDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM Account WHERE LOWER(username) LIKE ? OR LOWER(CONCAT(firstName, ' ', lastName)) LIKE ? OR LOWER(email) LIKE ? OR phone LIKE ?";
+        String sql = "SELECT * FROM Account WHERE LOWER(username) LIKE ? "
+                + "OR LOWER(firstName + ' ' + lastName) LIKE ? "
+                + "OR LOWER(email) LIKE ? "
+                + "OR phone LIKE ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
             String search = "%" + keyword.toLowerCase() + "%";
@@ -215,65 +229,70 @@ public class AccountDAO {
             while (rs.next()) {
                 list.add(extractAccount(rs));
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         return list;
     }
 
-    // === LƯU MÃ OTP ===
-    public void saveOTPCode(String username, String otp) {
+    // === LƯU MÃ OTP ĐỂ RESET MẬT KHẨU ===
+    public void saveOTPForReset(String username, String otp) {
         String sql = "UPDATE Account SET code = ? WHERE username = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, otp);
             ps.setString(2, username);
             ps.executeUpdate();
-            System.out.println("✅ OTP đã lưu cho " + username);
 
         } catch (Exception e) {
-            System.err.println("❌ Lỗi lưu OTP: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    // === XÁC THỰC OTP ===
+    // === XOÁ MÃ OTP ===
+    public void clearOTP(String username) {
+        String sql = "UPDATE Account SET code = NULL WHERE username = ?";
+        try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, username);
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // === XÁC THỰC MÃ OTP ===
     public boolean verifyOTP(String username, String otp) {
         String sql = "SELECT 1 FROM Account WHERE username = ? AND code = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, username);
             ps.setString(2, otp);
             ResultSet rs = ps.executeQuery();
-
-            boolean matched = rs.next();
-            System.out.println("🔍 OTP check for " + username + ": " + matched);
-            return matched;
+            return rs.next();
 
         } catch (Exception e) {
-            System.err.println("❌ Lỗi verify OTP: " + e.getMessage());
+            e.printStackTrace();
         }
         return false;
     }
 
-    // === LẤY OTP HIỆN TẠI ===
+    // === LẤY MÃ OTP THEO USERNAME ===
     public String getOTPCode(String username) {
         String sql = "SELECT code FROM Account WHERE username = ?";
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
-
             if (rs.next()) {
                 return rs.getString("code");
             }
 
         } catch (Exception e) {
-            System.err.println("❌ Lỗi get OTP: " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
 
-    // === MAP RESULTSET → DTO ===
+    // === CHUYỂN KẾT QUẢ THÀNH DTO ===
     private AccountDTO extractAccount(ResultSet rs) throws SQLException {
         return new AccountDTO(
                 rs.getString("username"),

@@ -8,17 +8,14 @@ import jakarta.servlet.http.*;
 import util.MailUtil;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Random;
 
-/**
- * ForgotPasswordServlet
- *
- * Handles: 1. User submits username and email. 2. System verifies info,
- * generates OTP, emails OTP. 3. Stores OTP + user info in session & DB.
- */
 @WebServlet(name = "ForgotPasswordServlet", urlPatterns = {"/forgot-password"})
 public class ForgotPasswordServlet extends HttpServlet {
+
+    private String generateOTP() {
+        return String.valueOf(100000 + new Random().nextInt(900000));
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -30,36 +27,46 @@ public class ForgotPasswordServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String username = request.getParameter("username");
+        request.setCharacterEncoding("UTF-8");
+        HttpSession session = request.getSession();
+
         String email = request.getParameter("email");
 
-        AccountDAO dao = new AccountDAO();
-        AccountDTO account = dao.getAccountByUsername(username);
+        if (email == null || email.trim().isEmpty()) {
+            request.setAttribute("error", "⚠️ Please enter your email.");
+            request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
+            return;
+        }
 
-        if (account != null && account.getEmail().equalsIgnoreCase(email)) {
-            String otp = String.format("%06d", new Random().nextInt(1_000_000));
-            dao.saveOTPCode(username, otp);
+        try {
+            AccountDAO dao = new AccountDAO();
+            AccountDTO account = dao.findByEmail(email.trim());
 
-            try {
-                MailUtil.sendOTP(email, otp);
-            } catch (Exception e) {
-                e.printStackTrace();
-                request.setAttribute("error", "⚠️ Gửi OTP thất bại. Vui lòng thử lại.");
+            if (account == null) {
+                request.setAttribute("error", "❌ Email not found in the system.");
                 request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
                 return;
             }
 
-            // ✅ KHÔNG dùng session.getSession(false), luôn tạo mới (true)
-            HttpSession session = request.getSession(true);
-            session.setAttribute("otp", otp);
-            session.setAttribute("resetUser", username);
-            session.setAttribute("resetEmail", email);
-            session.setAttribute("otpPurpose", "reset");
+            // Gửi OTP
+            String otp = generateOTP();
+            MailUtil.sendOTP(email, otp);
 
-            System.out.println("✅ OTP gửi: " + otp + " cho user: " + username);
-            response.sendRedirect(request.getContextPath() + "/verify-otp-reset");
-        } else {
-            request.setAttribute("error", "⚠️ Username hoặc email không đúng.");
+            // Lưu OTP vào DB
+            dao.saveOTPForReset(account.getUsername(), otp);
+
+            // Lưu session phục vụ bước xác minh OTP
+            session.setAttribute("otp", otp);
+            session.setAttribute("otpPurpose", "reset");
+            session.setAttribute("resetUser", account.getUsername());
+            session.setAttribute("resetEmail", email);
+
+            // Điều hướng đến trang xác minh OTP
+            request.getRequestDispatcher("/WEB-INF/view/account/verify-otp-reset.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "❌ Failed to send OTP: " + e.getMessage());
             request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
         }
     }

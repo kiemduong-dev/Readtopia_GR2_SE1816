@@ -1,6 +1,8 @@
 package controller.admin;
 
 import dao.AccountDAO;
+import dao.StaffDAO;
+import dto.AccountDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -10,86 +12,66 @@ import java.io.IOException;
 /**
  * AccountDeleteServlet
  *
- * This servlet is responsible for deleting a user account from the system.
- * It can be triggered via GET or POST requests from the admin dashboard.
+ * Xử lý yêu cầu xóa mềm tài khoản từ Admin Dashboard.
+ * Nếu role != 1 (không phải Customer), sẽ xóa bản ghi Staff liên quan.
  */
 @WebServlet(name = "AccountDeleteServlet", urlPatterns = {"/admin/account/delete"})
 public class AccountDeleteServlet extends HttpServlet {
 
-    /**
-     * Handles GET request for deleting a user account.
-     * Typically used when triggered by hyperlink or button click.
-     */
+    private final AccountDAO accountDAO = new AccountDAO();
+    private final StaffDAO staffDAO = new StaffDAO();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Delegate to shared logic for deletion
         processDelete(request, response);
     }
 
-    /**
-     * Handles POST request for deleting a user account.
-     * Recommended for secure operations via form submission.
-     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // Delegate to shared logic for deletion
         processDelete(request, response);
     }
 
-    /**
-     * Core method that performs the deletion logic.
-     * This method:
-     *  - Retrieves the username from request parameters.
-     *  - Validates input.
-     *  - Calls DAO to delete the user account.
-     *  - Sets result message in session.
-     *  - Redirects to the account listing page.
-     *
-     * @param request  HttpServletRequest object
-     * @param response HttpServletResponse object
-     * @throws IOException if redirection fails
-     */
     private void processDelete(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
-        // Get username from query string or form
         String username = request.getParameter("username");
-
-        // Get current session to store feedback message
         HttpSession session = request.getSession();
 
-        // Step 1: Validate input
-        if (username != null && !username.trim().isEmpty()) {
-
-            // Step 2: Call DAO to delete account
-            AccountDAO dao = new AccountDAO();
-            boolean success = dao.deleteAccount(username.trim());
-
-            // Step 3: Set session message based on result
-            if (success) {
-                session.setAttribute("message", "The account has been deleted successfully.");
-            } else {
-                session.setAttribute("message", "Account deletion failed. Please try again.");
-            }
-
-        } else {
-            // Handle invalid or missing username input
-            session.setAttribute("message", "Invalid username. Unable to proceed with deletion.");
+        if (username == null || username.trim().isEmpty()) {
+            session.setAttribute("message", "⚠️ Invalid username. Deletion aborted.");
+            response.sendRedirect(request.getContextPath() + "/admin/account/list");
+            return;
         }
 
-        // Step 4: Redirect user back to account listing page
+        username = username.trim();
+        AccountDTO account = accountDAO.getAccountByUsername(username);
+
+        if (account == null) {
+            session.setAttribute("message", "⚠️ Account not found.");
+        } else {
+            // Nếu không phải customer → xóa bản ghi staff liên quan
+            if (account.getRole() != 1) {
+                staffDAO.deleteByUsername(username);
+            }
+
+            // Cập nhật trạng thái tài khoản thành accStatus = 0 (soft delete)
+            account.setAccStatus(0);
+            boolean success = accountDAO.updateAccountStatus(account);
+
+            if (success) {
+                session.setAttribute("message", "✅ Account \"" + username + "\" deleted (deactivated) successfully.");
+            } else {
+                session.setAttribute("message", "❌ Failed to delete account \"" + username + "\".");
+            }
+        }
+
         response.sendRedirect(request.getContextPath() + "/admin/account/list");
     }
 
-    /**
-     * Returns a short description of the servlet's purpose.
-     *
-     * @return String description
-     */
     @Override
     public String getServletInfo() {
-        return "Admin servlet for deleting a user account by username.";
+        return "Handles soft-deletion of user accounts from Admin Dashboard.";
     }
 }

@@ -3,51 +3,28 @@ package dto;
 import java.sql.Date;
 
 /**
- * AccountDTO represents a data transfer object for the 'Account' entity. This
- * class is used to transfer account data between the View, Controller, and DAO
- * layers of the ReadTopia application, and reflects the structure of the
- * Account table in the database.
+ * DTO đại diện cho bảng Account trong database. Dùng để truyền dữ liệu giữa
+ * View - Controller - DAO trong CapyBook.
  */
 public class AccountDTO {
 
-    // ===== Account Fields =====
-    private String username;     // Unique identifier for the account
-    private String password;     // Account password (stored in hashed format in DB)
-    private String firstName;    // User's first name
-    private String lastName;     // User's last name
-    private Date dob;            // Date of birth
-    private String email;        // Email address used for contact and verification
-    private String phone;        // User's phone number
-    private int role;            // Role: 0 = admin/staff, 1 = customer
-    private String address;      // User's address
-    private int sex;             // Gender: 0 = female, 1 = male
-    private int accStatus;       // Account status: 0 = inactive, 1 = active
-    private String code;         // One-time code for password reset or verification
+    private String username;
+    private String password;  // Đã mã hóa BCrypt trong DB
+    private String firstName;
+    private String lastName;
+    private Date dob;
+    private String email;
+    private String phone;
+    private int role;         // 0: admin/staff, 1: customer
+    private String address;
+    private int sex;          // 0: female, 1: male
+    private int accStatus;    // 0: inactive, 1: active
+    private String code;      // Dùng cho OTP/reset
 
-    // ===== Constructors =====
-    /**
-     * Default constructor. Creates an empty AccountDTO object.
-     */
+    // === Constructors ===
     public AccountDTO() {
     }
 
-    /**
-     * Parameterized constructor that initializes all account fields. Useful
-     * when retrieving full account details from database.
-     *
-     * @param username Account username
-     * @param password Account password
-     * @param firstName First name
-     * @param lastName Last name
-     * @param dob Date of birth
-     * @param email Email address
-     * @param phone Phone number
-     * @param role User role
-     * @param address Address
-     * @param sex Gender
-     * @param accStatus Account status
-     * @param code Verification or reset code
-     */
     public AccountDTO(String username, String password, String firstName, String lastName,
             Date dob, String email, String phone, int role, String address,
             int sex, int accStatus, String code) {
@@ -65,11 +42,6 @@ public class AccountDTO {
         this.code = code;
     }
 
-    /**
-     * Copy constructor. Creates a duplicate of an existing AccountDTO object.
-     *
-     * @param other Another AccountDTO object
-     */
     public AccountDTO(AccountDTO other) {
         this.username = other.username;
         this.password = other.password;
@@ -85,7 +57,7 @@ public class AccountDTO {
         this.code = other.code;
     }
 
-    // ===== Getters and Setters =====
+    // === Getters & Setters ===
     public String getUsername() {
         return username;
     }
@@ -182,22 +154,15 @@ public class AccountDTO {
         this.code = code;
     }
 
-    // ===== Utility Methods =====
-    /**
-     * Combines first and last name into a single full name string.
-     *
-     * @return Full name in the format "FirstName LastName"
-     */
+    // === Utility Methods ===
     public String getFullName() {
         return this.firstName + " " + this.lastName;
     }
 
-    /**
-     * Returns a readable string containing the main account details, excluding
-     * sensitive fields like password or code.
-     *
-     * @return A string describing the account information
-     */
+    public boolean isActive() {
+        return this.accStatus == 1;
+    }
+
     @Override
     public String toString() {
         return "AccountDTO{"

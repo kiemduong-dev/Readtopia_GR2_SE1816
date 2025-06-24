@@ -1,22 +1,29 @@
 // Page navigation
-function showPage(pageId) {
+function showPage(pageId, event) {
     // Hide all pages
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
 
     // Show selected page
-    document.getElementById(pageId).classList.add('active');
+    const targetPage = document.getElementById(pageId);
+    if (targetPage) {
+        targetPage.classList.add('active');
+    }
 
     // Update active menu item
-    const menuItems = document.querySelectorAll('.menu-item');
-    menuItems.forEach(item => item.classList.remove('active'));
-    event.target.classList.add('active');
+    if (event && event.target) {
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => item.classList.remove('active'));
+        event.target.classList.add('active');
+    }
 }
 
 // Initialize revenue chart
 function initRevenueChart() {
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(ctx, {
+    const ctx = document.getElementById('revenueChart');
+    if (!ctx) return;
+
+    new Chart(ctx.getContext('2d'), {
         type: 'line',
         data: {
             labels: [], // dữ liệu thời gian sẽ được load từ server
@@ -48,28 +55,35 @@ function initRevenueChart() {
 
 // Modal functions - chỉ mở modal, không gán dữ liệu mẫu
 function showAddAccountModal() {
-    document.getElementById('addAccountModal').style.display = 'block';
+    const modal = document.getElementById('addAccountModal');
+    if (modal) modal.style.display = 'block';
 }
 
 function viewAccount(username) {
     // TODO: load dữ liệu account từ backend và gán vào modal trước khi show
-    document.getElementById('viewAccountModal').style.display = 'block';
+    const modal = document.getElementById('viewAccountModal');
+    if (modal) modal.style.display = 'block';
 }
 
 function editAccount(username) {
     // TODO: load dữ liệu account từ backend và gán vào modal trước khi show
-    document.getElementById('editAccountModal').style.display = 'block';
+    const modal = document.getElementById('editAccountModal');
+    if (modal) modal.style.display = 'block';
 }
 
 let deleteAccountUsername = '';
 function deleteAccount(username) {
     deleteAccountUsername = username;
-    document.getElementById('deleteMessage').textContent = `Do you want to delete ${username} account?`;
-    document.getElementById('deleteConfirmModal').style.display = 'block';
+    const deleteMsg = document.getElementById('deleteMessage');
+    if (deleteMsg) deleteMsg.textContent = `Do you want to delete ${username} account?`;
+
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) modal.style.display = 'block';
 }
 
 function confirmDelete() {
-    // TODO: gọi API backend xóa account
+    // TODO: gọi API backend xóa account, ví dụ fetch hoặc AJAX
+
     showSuccessMessage(`Account ${deleteAccountUsername} has been deleted successfully`);
     closeModal('deleteConfirmModal');
     deleteAccountUsername = '';
@@ -77,45 +91,56 @@ function confirmDelete() {
 
 function showChangePasswordModal() {
     closeModal('profileModal');
-    document.getElementById('changePasswordModal').style.display = 'block';
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) modal.style.display = 'block';
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).style.display = 'none';
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = 'none';
 }
 
 // Form submissions (giữ nguyên, xử lý gửi form thực tế ở backend)
-document.getElementById('addAccountForm').onsubmit = function (e) {
-    e.preventDefault();
-    // TODO: gửi dữ liệu lên backend
-    showSuccessMessage('Account has been added successfully');
-    closeModal('addAccountModal');
-    this.reset();
-};
+const addForm = document.getElementById('addAccountForm');
+if (addForm) {
+    addForm.onsubmit = function (e) {
+        e.preventDefault();
+        // TODO: gửi dữ liệu lên backend
+        showSuccessMessage('Account has been added successfully');
+        closeModal('addAccountModal');
+        this.reset();
+    };
+}
 
-document.getElementById('editAccountForm').onsubmit = function (e) {
-    e.preventDefault();
-    // TODO: gửi dữ liệu cập nhật lên backend
-    showSuccessMessage('Account has been updated successfully');
-    closeModal('editAccountModal');
-};
+const editForm = document.getElementById('editAccountForm');
+if (editForm) {
+    editForm.onsubmit = function (e) {
+        e.preventDefault();
+        // TODO: gửi dữ liệu cập nhật lên backend
+        showSuccessMessage('Account has been updated successfully');
+        closeModal('editAccountModal');
+    };
+}
 
-document.getElementById('changePasswordForm').onsubmit = function (e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const newPassword = formData.get('newPassword');
-    const confirmPassword = formData.get('confirmPassword');
+const changePwdForm = document.getElementById('changePasswordForm');
+if (changePwdForm) {
+    changePwdForm.onsubmit = function (e) {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const newPassword = formData.get('newPassword');
+        const confirmPassword = formData.get('confirmPassword');
 
-    if (newPassword !== confirmPassword) {
-        alert('New password and confirm password do not match!');
-        return;
-    }
+        if (newPassword !== confirmPassword) {
+            alert('New password and confirm password do not match!');
+            return;
+        }
 
-    // TODO: gửi đổi mật khẩu lên backend
-    showSuccessMessage('Password has been changed successfully');
-    closeModal('changePasswordModal');
-    this.reset();
-};
+        // TODO: gửi đổi mật khẩu lên backend
+        showSuccessMessage('Password has been changed successfully');
+        closeModal('changePasswordModal');
+        this.reset();
+    };
+}
 
 // Success message function
 function showSuccessMessage(message) {
@@ -139,23 +164,24 @@ function showSuccessMessage(message) {
 }
 
 // Search functionality for account
-document.getElementById('accountSearch').addEventListener('input', function (e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('#accountTableBody tr');
+const accountSearchInput = document.getElementById('accountSearch');
+if (accountSearchInput) {
+    accountSearchInput.addEventListener('input', function (e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#accountTableBody tr');
 
-    rows.forEach(row => {
-        const username = row.cells[0].textContent.toLowerCase();
-        const fullName = row.cells[1].textContent.toLowerCase();
+        rows.forEach(row => {
+            const username = row.cells[0].textContent.toLowerCase();
+            const fullName = row.cells[1].textContent.toLowerCase();
 
-        if (username.includes(searchTerm) || fullName.includes(searchTerm)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+            if (username.includes(searchTerm) || fullName.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
     });
-});
-
-// Tương tự bạn có thể giữ nguyên các hàm show modal, edit, delete, search cho staff, book, supplier, promotion,... chỉ xóa phần gán dữ liệu mẫu, thêm comment TODO để bạn tiện bổ sung dữ liệu từ backend
+}
 
 // Initialize charts (bạn gọi sau khi trang load)
 document.addEventListener('DOMContentLoaded', function () {
@@ -167,8 +193,8 @@ document.addEventListener('DOMContentLoaded', function () {
 window.onclick = function (event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
-        if (event.target == modal) {
+        if (event.target === modal) {
             modal.style.display = 'none';
         }
     });
-}
+};
