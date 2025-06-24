@@ -15,28 +15,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DBContext {
+    private final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=ReadTopia;encrypt=false";
+    private final String DB_USER = "sa";        
+    private final String DB_PASSWORD = "123";   
 
-    private static Connection conn;
-
-    public static Connection getConnection() {
-        try {
-
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            conn = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;"
-                    + "databaseName=ReadTopia;"
-                    + "user=sa;password=1;"
-                    + "encrypt=true;"
-                    + "trustServerCertificate=true;");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(DBContext.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return conn;
-    }
-
-    public static void main(String[] args) {
-        DBContext context = new DBContext();
-        context.getConnection();
+    public Connection getConnection() throws Exception {
+        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 }

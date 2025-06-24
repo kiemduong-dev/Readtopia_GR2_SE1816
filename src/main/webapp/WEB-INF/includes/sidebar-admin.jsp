@@ -42,7 +42,7 @@
                 <i class="fas fa-shopping-cart"></i>
                 Order Management
             </a>
-            <a href="#" class="menu-item" onclick="showPage('promotion-management')">
+            <a href=" ${pageContext.request.contextPath}/admin/promotion/list" class="menu-item" >
                 <i class="fas fa-tags"></i>
                 Promotion Management
             </a>
@@ -58,7 +58,7 @@
                 <i class="fas fa-warehouse"></i>
                 Inventory Management
             </a>
-            <a href="#" class="menu-item" onclick="showPage('notification-management')">
+            <a href=" ${pageContext.request.contextPath}/admin/notification/list" class="menu-item" >
                 <i class="fas fa-bell"></i>
                 Notification Management
             </a>

@@ -229,7 +229,6 @@
 		pro_action INT,
 		pro_log_date DATE,
 		CONSTRAINT PK_promotion_log PRIMARY KEY (pro_log_id),
-		CONSTRAINT FK_promotion_log_promotion FOREIGN KEY (pro_id) REFERENCES Promotion(proID),
 		CONSTRAINT FK_promotion_log_staff FOREIGN KEY (staff_id) REFERENCES Staff(staffID)
 	)
 	GO
