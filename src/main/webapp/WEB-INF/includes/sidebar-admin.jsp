@@ -22,7 +22,7 @@
         </div>
 
         <nav class="sidebar-menu">
-            <a href="#" class="menu-item active" onclick="showPage('dashboard')">
+            <a href="${pageContext.request.contextPath}/admin/dashboard" class="menu-item active" onclick="showPage('dashboard')">
                 <i class="fas fa-tachometer-alt"></i>
                 Dashboard
             </a>
@@ -34,7 +34,7 @@
                 <i class="fas fa-user-tie"></i>
                 Staff Management
             </a>
-            <a href="${pageContext.request.contextPath}/admin/book/list" class="menu-item" onclick="showPage('book-management')">
+            <a href="#" class="menu-item" onclick="showPage('book-management')">
                 <i class="fas fa-book"></i>
                 Book Management
             </a>
@@ -46,14 +46,15 @@
                 <i class="fas fa-tags"></i>
                 Promotion Management
             </a>
-            <a href="#" class="menu-item" onclick="showPage('supplier-management')">
+            <a href=" ${pageContext.request.contextPath}/admin/supplier/list" class="menu-item" >
                 <i class="fas fa-truck"></i>
                 Supplier Management
             </a>
-            <a href="${pageContext.request.contextPath}/admin/category/list" class="menu-item" onclick="showPage('category-management')">
+            <a href="#" class="menu-item" onclick="showPage('category-management')">
                 <i class="fas fa-list"></i>
                 Category Management
-            </a>            <a href="#" class="menu-item" onclick="showPage('inventory-management')">
+            </a>
+            <a href="<%= request.getContextPath()%>/admin/stock/list" class="menu-item" >
                 <i class="fas fa-warehouse"></i>
                 Inventory Management
             </a>

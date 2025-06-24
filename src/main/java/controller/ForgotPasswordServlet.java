@@ -10,63 +10,70 @@ import util.MailUtil;
 import java.io.IOException;
 import java.util.Random;
 
+/**
+ * ForgotPasswordServlet
+ *
+ * This servlet handles the "Forgot Password" process: - Verifies user by
+ * username and email - Generates a 6-digit OTP - Sends OTP to user's email -
+ * Stores OTP in both session and database
+ */
 @WebServlet(name = "ForgotPasswordServlet", urlPatterns = {"/forgot-password"})
 public class ForgotPasswordServlet extends HttpServlet {
 
-    private String generateOTP() {
-        return String.valueOf(100000 + new Random().nextInt(900000));
-    }
-
+    /**
+     * Display forgot password page on GET
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
     }
 
+    /**
+     * Handle forgot password form submission on POST
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession();
-
+        // Step 1: Get form values
+        String username = request.getParameter("username");
         String email = request.getParameter("email");
 
-        if (email == null || email.trim().isEmpty()) {
-            request.setAttribute("error", "⚠️ Please enter your email.");
-            request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
-            return;
-        }
+        AccountDAO dao = new AccountDAO();
+        AccountDTO account = dao.getAccountByUsername(username);
 
-        try {
-            AccountDAO dao = new AccountDAO();
-            AccountDTO account = dao.findByEmail(email.trim());
+        // Step 2: Validate account and email
+        if (account != null && account.getEmail().equalsIgnoreCase(email)) {
+            // Step 3: Generate OTP
+            String otp = String.format("%06d", new Random().nextInt(1_000_000));
 
-            if (account == null) {
-                request.setAttribute("error", "❌ Email not found in the system.");
+            // Step 4: Save OTP to DB
+            dao.saveOTPCode(username, otp);
+
+            try {
+                // Step 5: Send OTP
+                MailUtil.sendOTP(email, otp);
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Failed to send OTP to your email. Please try again.");
                 request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
                 return;
             }
 
-            // Gửi OTP
-            String otp = generateOTP();
-            MailUtil.sendOTP(email, otp);
-
-            // Lưu OTP vào DB
-            dao.saveOTPForReset(account.getUsername(), otp);
-
-            // Lưu session phục vụ bước xác minh OTP
+            // Step 6: Store in session
+            HttpSession session = request.getSession();
             session.setAttribute("otp", otp);
-            session.setAttribute("otpPurpose", "reset");
-            session.setAttribute("resetUser", account.getUsername());
+            session.setAttribute("resetUser", username);
             session.setAttribute("resetEmail", email);
+            session.setAttribute("otpPurpose", "reset");
 
-            // Điều hướng đến trang xác minh OTP
-            request.getRequestDispatcher("/WEB-INF/view/account/verify-otp-reset.jsp").forward(request, response);
+            // ✅ Step 7: Redirect to correct OTP input page for password reset
+            response.sendRedirect(request.getContextPath() + "/verify-otp-reset");
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            request.setAttribute("error", "❌ Failed to send OTP: " + e.getMessage());
+        } else {
+            // Invalid case
+            request.setAttribute("error", "Username or email is incorrect.");
             request.getRequestDispatcher("/WEB-INF/view/account/forgotPassword.jsp").forward(request, response);
         }
     }
