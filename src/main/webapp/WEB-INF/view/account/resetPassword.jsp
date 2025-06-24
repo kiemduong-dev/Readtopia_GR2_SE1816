@@ -7,62 +7,51 @@
     <body>
         <jsp:include page="/WEB-INF/includes/header.jsp" />
 
-        <div class="main-content">
-            <div class="form-container"
-                 style="max-width: 500px; margin: 50px auto; background: #fff;
-                 border-radius: 15px; padding: 30px;
-                 box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <!-- Reset Password Section -->
+        <div class="modal" style="display: block; background: none;">
+            <div class="modal-content">
 
-                <!-- Logo -->
-                <div class="logo-section text-center mb-3">
-                    <div class="logo-bear"></div>
-                    <div class="logo-text">READTOPIA</div>
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h2>🔐 Reset Password</h2>
+                    <button class="close" onclick="location.href = '${pageContext.request.contextPath}/login'">&times;</button>
                 </div>
 
-                <!-- Tiêu đề -->
-                <h2 class="text-center mb-3">🔐 Đặt Lại Mật Khẩu</h2>
+                <!-- Modal Body -->
+                <div class="modal-body">
 
-                <!-- Thông báo lỗi -->
-                <c:if test="${not empty error}">
-                    <div class="alert alert-danger text-center" role="alert">
-                        <i class="fas fa-exclamation-circle"></i> ${error}
-                    </div>
-                </c:if>
-
-                <!-- Thông báo thành công -->
-                <c:if test="${not empty success}">
-                    <div class="alert alert-success text-center" role="alert">
-                        <i class="fas fa-check-circle"></i> ${success}
-                    </div>
-                </c:if>
-
-                <!-- Form đặt lại mật khẩu -->
-                <form action="${pageContext.request.contextPath}/reset-password" method="post">
-                    <div class="form-group mb-3">
-                        <label class="form-label">Mật khẩu mới:</label>
-                        <input type="password"
-                               name="newPassword"
-                               class="form-control"
-                               required
-                               minlength="6"
-                               placeholder="Tối thiểu 6 ký tự" />
+                    <!-- Logo branding -->
+                    <div class="logo-section">
+                        <div class="logo-bear"></div>
+                        <div class="logo-text">READTOPIA</div>
                     </div>
 
-                    <div class="form-group mb-4">
-                        <label class="form-label">Xác nhận mật khẩu:</label>
-                        <input type="password"
-                               name="confirmPassword"
-                               class="form-control"
-                               required
-                               minlength="6"
-                               placeholder="Nhập lại mật khẩu mới" />
-                    </div>
+                    <!-- Thông báo lỗi -->
+                    <c:if test="${not empty error}">
+                        <div class="success-message" style="background: #fdecea; color: #c62828;">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>${error}</span>
+                        </div>
+                    </c:if>
 
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">✅ Đổi mật khẩu</button>
-                        <a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">🔙 Quay lại đăng nhập</a>
-                    </div>
-                </form>
+                    <!-- Form -->
+                    <form action="${pageContext.request.contextPath}/reset-password" method="post">
+                        <div class="form-group">
+                            <label class="form-label">New Password</label>
+                            <input type="password" name="newPassword" class="form-input" required minlength="6" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" name="confirmPassword" class="form-input" required minlength="6" />
+                        </div>
+
+                        <div class="btn-group mt-20">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <a href="${pageContext.request.contextPath}/login" class="btn btn-secondary">Back to Login</a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

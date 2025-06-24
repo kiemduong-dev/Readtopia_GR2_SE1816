@@ -10,8 +10,8 @@
 
         <!-- Thanh tìm ki?m -->
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="search book..." aria-label="Search books">
-            <button class="header-icon" id="searchBtn" title="search">
+            <input type="text" class="search-input" placeholder="Tìm ki?m sách..." aria-label="Search books">
+            <button class="header-icon" id="searchBtn" title="Tìm ki?m">
                 <i class="fas fa-search"></i>
             </button>
         </div>
@@ -25,7 +25,7 @@
                 <button class="header-icon" title="Bi?u ?? th?ng kê">
                     <i class="fas fa-chart-line"></i>
                 </button>
-                <button class="header-icon" title="th?ng kê" onclick="showCart()">
+                <button class="header-icon" title="Gi? hàng" onclick="showCart()">
                     <i class="fas fa-shopping-cart"></i>
                 </button>
             </div>

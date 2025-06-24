@@ -1,12 +1,14 @@
 package controller;
 
-import dao.AccountDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
 
+/**
+ * Servlet xử lý xác thực OTP trong luồng quên mật khẩu.
+ */
 @WebServlet(name = "VerifyOTPResetServlet", urlPatterns = {"/verify-otp-reset"})
 public class VerifyOTPResetServlet extends HttpServlet {
 
@@ -14,49 +16,43 @@ public class VerifyOTPResetServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        request.setCharacterEncoding("UTF-8");
-        HttpSession session = request.getSession(false); // ❗ Không tạo mới nếu không có
+        String enteredOtp = request.getParameter("otp");
+        HttpSession session = request.getSession(false); // Không tạo mới
 
-        // ❌ Kiểm tra session và các biến cần thiết
-        if (session == null ||
-            session.getAttribute("otp") == null ||
-            session.getAttribute("resetUser") == null ||
-            !"reset".equals(session.getAttribute("otpPurpose"))) {
-
+        // ❌ KHẮC PHỤC lỗi: session thiếu `resetUser` hoặc `otp` sẽ redirect sai
+        if (session == null
+                || session.getAttribute("otp") == null
+                || session.getAttribute("resetUser") == null
+                || session.getAttribute("otpPurpose") == null
+                || !"reset".equals(session.getAttribute("otpPurpose").toString())) {
+            // Trường hợp không hợp lệ → quay lại form quên mật khẩu
             response.sendRedirect(request.getContextPath() + "/forgot-password");
             return;
         }
 
-        String enteredOtp = request.getParameter("otp");
-        String sessionOtp = (String) session.getAttribute("otp");
-        String username = (String) session.getAttribute("resetUser");
+        String expectedOtp = (String) session.getAttribute("otp");
 
-        // ❌ OTP sai hoặc rỗng
-        if (enteredOtp == null || !enteredOtp.equals(sessionOtp)) {
-            request.setAttribute("error", "❌ Invalid OTP. Please try again.");
-            request.getRequestDispatcher("/WEB-INF/view/account/verify-otp-reset.jsp").forward(request, response);
-            return;
+        if (enteredOtp != null && enteredOtp.equals(expectedOtp)) {
+            // ✅ OTP đúng → dọn session và chuyển sang reset password
+            session.removeAttribute("otp");
+            session.removeAttribute("otpPurpose");
+
+            // 🔑 CẦN THIẾT: đảm bảo servlet ResetPasswordServlet có thể truy cập username
+            session.setAttribute("resetUsername", session.getAttribute("resetUser"));
+            session.removeAttribute("resetUser");
+
+            response.sendRedirect(request.getContextPath() + "/reset-password");
+        } else {
+            // ❌ OTP sai
+            request.setAttribute("error", "Invalid OTP code. Please try again.");
+            request.getRequestDispatcher("/WEB-INF/view/account/verifyOTP.jsp").forward(request, response);
         }
-
-        // ✅ Bảo mật: kiểm tra OTP có đúng từ DB không
-        AccountDAO dao = new AccountDAO();
-        if (!dao.verifyOTP(username, enteredOtp)) {
-            request.setAttribute("error", "❌ OTP mismatch or expired. Please request again.");
-            request.getRequestDispatcher("/WEB-INF/view/account/verify-otp-reset.jsp").forward(request, response);
-            return;
-        }
-
-        // ✅ Xác thực thành công → đánh dấu đã xác minh
-        session.setAttribute("verifiedReset", true);
-
-        // Chuyển đến trang đặt lại mật khẩu
-        request.getRequestDispatcher("/WEB-INF/view/account/resetPassword.jsp").forward(request, response);
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        // 🚫 Không cho phép truy cập trực tiếp GET
-        response.sendRedirect(request.getContextPath() + "/forgot-password");
+        // ✅ Forward đúng sang form nhập OTP
+        request.getRequestDispatcher("/WEB-INF/view/account/verifyOTP.jsp").forward(request, response);
     }
 }

@@ -11,63 +11,82 @@ import java.sql.Date;
 
 /**
  * Servlet that handles the functionality for an admin to add a new account.
- * Supports both GET (display form) and POST (handle submission).
+ * This servlet supports both GET (display form) and POST (handle submission).
  */
 @WebServlet(name = "AccountAddServlet", urlPatterns = {"/admin/account/add"})
 public class AccountAddServlet extends HttpServlet {
 
+    /**
+     * Handles GET request to display the account creation form.
+     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        // Forward to JSP form for adding new account
         request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
     }
 
+    /**
+     * Handles POST request to process new account creation.
+     */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // Set request and response encoding
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
 
         try {
-            String username = request.getParameter("username").trim();
-            String firstName = request.getParameter("firstName").trim();
-            String lastName = request.getParameter("lastName").trim();
-            String email = request.getParameter("email").trim();
-            String phone = request.getParameter("phone").trim();
-            String address = request.getParameter("address").trim();
-            String dobRaw = request.getParameter("dob");
+            // ===== Retrieve form input =====
+            String username = request.getParameter("username");
+            String firstName = request.getParameter("firstName");
+            String lastName = request.getParameter("lastName");
+            String email = request.getParameter("email");
+            String phone = request.getParameter("phone");
+            String address = request.getParameter("address");
+
             int role = Integer.parseInt(request.getParameter("role"));
             int sex = Integer.parseInt(request.getParameter("sex"));
 
-            Date dob = (dobRaw != null && !dobRaw.isEmpty()) ? Date.valueOf(dobRaw) : null;
+            // Parse date of birth if provided
+            String dobRaw = request.getParameter("dob");
+            Date dob = (dobRaw != null && !dobRaw.trim().isEmpty()) ? Date.valueOf(dobRaw) : null;
 
-            // Mật khẩu mặc định là "1" (hash trong DAO)
-            String rawPassword = "1";
+            // Default password for new account
+            String password = "123456";
 
-            AccountDTO acc = new AccountDTO(username, rawPassword, firstName, lastName, dob,
-                    email, phone, role, address, sex, 1, null); // accStatus = 1
+            // ===== Create DTO from form =====
+            AccountDTO acc = new AccountDTO(username, password, firstName, lastName, dob, email, phone,
+                    role, address, sex, 1, null); // accStatus = 1 (active), code = null
 
+            // ===== Insert into DB =====
             AccountDAO dao = new AccountDAO();
-            boolean added = dao.addAccount(acc);
+            boolean success = dao.addAccount(acc);
 
-            if (added) {
+            if (success) {
+                // Redirect to account list if added successfully
                 response.sendRedirect("list");
             } else {
-                request.setAttribute("error", "❌ Failed to add account. Username or email may already exist.");
-                request.setAttribute("account", acc);
+                // Handle duplicate username/email
+                request.setAttribute("error", "Failed to add account. Username or email may already exist.");
+                request.setAttribute("account", acc); // Preserve input on error
                 request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "❌ Invalid input. Please check the form.");
+            // General error message for bad input or exceptions
+            request.setAttribute("error", "Invalid input data. Please check the fields.");
             request.getRequestDispatcher("/WEB-INF/view/admin/account/add.jsp").forward(request, response);
         }
     }
 
+    /**
+     * @return Short servlet description
+     */
     @Override
     public String getServletInfo() {
-        return "Admin adds a new user account.";
+        return "Handles admin functionality to add a new user account.";
     }
 }

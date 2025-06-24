@@ -1,7 +1,5 @@
 package dto;
 
-import dao.*;
-
 public class BookDTO {
 
     private int bookID;

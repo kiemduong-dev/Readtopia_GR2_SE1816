@@ -508,3 +508,30 @@ body {
 .page.active {
     display: block;
 }
+.btn-tab {
+        background-color: #e0e0e0;
+        border: none;
+        padding: 8px 16px;
+        margin-right: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-weight: bold;
+    }
+
+    .btn-tab.active {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .btn-icon {
+        background-color: #007bff;
+        color: white;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .btn-icon:hover {
+        background-color: #0056b3;
+    }

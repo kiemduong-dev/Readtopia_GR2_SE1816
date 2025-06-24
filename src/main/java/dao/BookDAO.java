@@ -46,20 +46,20 @@ public class BookDAO {
         return null;
     }
 
-    public List<BookDTO> searchBooksByTitleOrAuthor(String keyword) {
+    // Tìm sách theo tiêu đề
+    public List<BookDTO> searchBooksByTitle(String keyword) {
         List<BookDTO> list = new ArrayList<>();
-        String sql = "SELECT * FROM Book WHERE bookStatus = 1 AND (bookTitle LIKE ? OR author LIKE ?)";
+        String sql = "SELECT * FROM Book WHERE bookStatus = 1 AND bookTitle LIKE ?";
 
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            String pattern = "%" + keyword + "%";
-            ps.setString(1, pattern);
-            ps.setString(2, pattern);
+            ps.setString(1, "%" + keyword + "%");
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 list.add(extractBookFromResultSet(rs));
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -92,7 +92,7 @@ public class BookDAO {
         try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql);  ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                list.add(extractBookFromResultSet(rs));
+list.add(extractBookFromResultSet(rs));
             }
 
         } catch (Exception e) {
@@ -141,21 +141,20 @@ public class BookDAO {
     }
 
     // Cập nhật sách
-    public void updateBook(BookDTO book) {
-        String sql = "UPDATE Book SET bookTitle = ?, author = ?, translator = ?, publisher = ?, publicationYear = ?, "
-                + "isbn = ?, image = ?, bookDescription = ?, hardcover = ?, dimension = ?, weight = ?, "
-                + "bookPrice = ?, bookQuantity = ?, bookStatus = ? WHERE bookID = ?";
+   public void updateBook(int bookID, int quantityDelta) {
+    String sql = "UPDATE Book SET bookQuantity = bookQuantity + ? WHERE bookID = ?";
 
-        try ( Connection conn = new DBContext().getConnection();  PreparedStatement ps = conn.prepareStatement(sql)) {
+    try (Connection conn = DBContext.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            setBookParams(ps, book);
-            ps.setInt(15, book.getBookID());
-            ps.executeUpdate();
+        ps.setInt(1, quantityDelta); // quantityDelta nên âm khi xuất
+        ps.setInt(2, bookID);
+        ps.executeUpdate();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+}
 
     // Xoá sách
     public void deleteBook(int bookID) {
@@ -182,7 +181,7 @@ public class BookDAO {
                 rs.getString("author"),
                 rs.getString("translator"),
                 rs.getString("publisher"),
-                rs.getInt("publicationYear"),
+rs.getInt("publicationYear"),
                 rs.getString("isbn"),
                 rs.getString("image"),
                 rs.getString("bookDescription"),
@@ -212,4 +211,6 @@ public class BookDAO {
         ps.setInt(13, book.getBookQuantity());
         ps.setInt(14, book.getBookStatus());
     }
+
+  
 }
