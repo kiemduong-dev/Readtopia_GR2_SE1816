@@ -34,7 +34,7 @@
                 <i class="fas fa-user-tie"></i>
                 Staff Management
             </a>
-            <a href="#" class="menu-item" onclick="showPage('book-management')">
+            <a href="${pageContext.request.contextPath}/admin/book/list" class="menu-item" onclick="showPage('book-management')">
                 <i class="fas fa-book"></i>
                 Book Management
             </a>
@@ -50,11 +50,10 @@
                 <i class="fas fa-truck"></i>
                 Supplier Management
             </a>
-            <a href="#" class="menu-item" onclick="showPage('category-management')">
+            <a href="${pageContext.request.contextPath}/admin/category/list" class="menu-item" onclick="showPage('category-management')">
                 <i class="fas fa-list"></i>
                 Category Management
-            </a>
-            <a href="#" class="menu-item" onclick="showPage('inventory-management')">
+            </a>            <a href="#" class="menu-item" onclick="showPage('inventory-management')">
                 <i class="fas fa-warehouse"></i>
                 Inventory Management
             </a>
